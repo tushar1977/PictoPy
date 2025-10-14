@@ -61,16 +61,20 @@ export function FaceSearchDialog() {
   });
 
   const handleWebCam = async () => {
+    navigate(`/${ROUTES.HOME}`);
     try {
       await navigator.mediaDevices.getUserMedia({ video: true });
-
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoInputs = devices.filter((d) => d.kind === 'videoinput');
-
-      console.log('Video Inputs:', videoInputs);
-    } catch (err) {
-      console.error('Camera access denied:', err);
-      alert('Could not access camera: ' + err);
+      setShowCamera(true);
+      setIsDialogOpen(false);
+    } catch (error) {
+      dispatch(
+        showInfoDialog({
+          title: "Webcam doesn't support",
+          message:
+            'Webcam is not supported or access was denied on this device.',
+          variant: 'error',
+        }),
+      );
     }
   };
 

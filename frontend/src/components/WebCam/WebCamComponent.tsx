@@ -77,22 +77,66 @@ function WebcamComponent({ isOpen, onClose }: WebcamComponentProps) {
     setShowCamera(true);
   };
 
-  const handleSearchCapturedImage = () => {
-    if (capturedImageUrl) {
+const handleSearchCapturedImage = async () => {
+  if (capturedImageUrl) {
+    try {
+      // Extract the base64 data (after the comma)
+      const base64Data = capturedImageUrl.split(',')[1];
+
+      // Convert base64 → binary
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+
+      // Create a Blob from the binary data
+      const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
+      // Create a File object (optional)
+      const file = new File([blob], `captured-image-${Date.now()}.jpg`, { type: 'image/jpeg' });
+
+      // Create an object URL for the blob (local file-like path)
+      const imagePath = URL.createObjectURL(file);
+
+      // Dispatch and trigger your search
+      dispatch(startSearch(imagePath));
+      dispatch(showLoader('Searching faces...'));
+      getSearchImages(imagePath);
+
+      handleClose();
+    } catch (error) {
+      console.error('Error processing image:', error);
+
+      // Fallback to base64 if something breaks
       dispatch(startSearch(capturedImageUrl));
       dispatch(showLoader('Searching faces...'));
       getSearchImages(capturedImageUrl);
+      handleClose();
     }
-  };
+  }
+};
+
 
   const handleClose = () => {
+    const stream = webcamRef.current?.stream as MediaStream;
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+    }
+
     setShowCamera(true);
     setCapturedImageUrl(null);
     onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) handleClose();
+      }}
+    >
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>
