@@ -64,6 +64,7 @@ export function FaceSearchDialog() {
     navigate(`/${ROUTES.HOME}`);
     try {
       await navigator.mediaDevices.getUserMedia({ video: true });
+
       setShowCamera(true);
       setIsDialogOpen(false);
     } catch (error) {
@@ -72,6 +73,7 @@ export function FaceSearchDialog() {
           title: "Webcam doesn't support",
           message:
             'Webcam is not supported or access was denied on this device.',
+
           variant: 'error',
         }),
       );
