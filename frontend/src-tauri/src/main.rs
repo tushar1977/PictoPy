@@ -15,6 +15,19 @@ struct Pids {
     sync: u32,
 }
 
+#[cfg(feature = "ci")]
+fn is_process_alive(pid: u32) -> bool {
+    if pid == 0 {
+        return false;
+    }
+
+    let mut system = System::new();
+    system.refresh_all();
+
+    let pid = Pid::from_u32(pid);
+    system.process(pid).is_some()
+}
+
 fn on_window_event(window: &Window, event: &WindowEvent) {
     if !matches!(event, WindowEvent::CloseRequested { .. }) {
         return;
@@ -109,13 +122,21 @@ fn prod(app: &tauri::AppHandle, resource_path: &std::path::Path) -> Result<(), S
     let state = app.state::<Mutex<Pids>>();
 
     {
-        let pids = state.lock().unwrap();
-        if pids.backend != 0 || pids.sync != 0 {
-            println!("Backend or sync already running, skipping spawn");
+        let mut pids = state.lock().unwrap();
+        if pids.backend != 0 && !is_process_alive(pids.backend) {
+            println!("Backend PID {} is stale, clearing", pids.backend);
+            pids.backend = 0;
+        }
+        if pids.sync != 0 && !is_process_alive(pids.sync) {
+            println!("Sync PID {} is stale, clearing", pids.sync);
+            pids.sync = 0;
+        }
+
+        if pids.backend != 0 && pids.sync != 0 {
+            println!("Backend and sync already running, skipping spawn");
             return Ok(());
         }
     }
-
     let (mut backend_rx, backend_child) = app
         .shell()
         .command(&backend_executable)
