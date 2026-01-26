@@ -361,6 +361,8 @@ jobs:
         if: matrix.platform == 'ubuntu-22.04'
         shell: bash
         run: |
+          ls ${GITHUB_WORKSPACE}/sync-microservice/dist/PictoPy_Sync/_internal
+          ls ${GITHUB_WORKSPACE}/backend/dist/PictoPy_Server/_internal
           echo "LD_LIBRARY_PATH=${GITHUB_WORKSPACE}/sync-microservice/dist/PictoPy_Sync/_internal:${GITHUB_WORKSPACE}/backend/dist/PictoPy_Server/_internal:${LD_LIBRARY_PATH}" >> $GITHUB_ENV
 
       - uses: tauri-apps/tauri-action@v0
