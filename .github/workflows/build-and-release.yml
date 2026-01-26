@@ -357,6 +357,12 @@ jobs:
           cd frontend
           npm install
 
+      - name: Export LD_LIBRARY_PATH (linux only)
+        if: matrix.platform == 'ubuntu-22.04'
+        shell: bash
+        run: |
+          echo "LD_LIBRARY_PATH=${GITHUB_WORKSPACE}/sync-microservice/dist/PictoPy_Sync/_internal:${GITHUB_WORKSPACE}/backend/dist/PictoPy_Server/_internal:${LD_LIBRARY_PATH}" >> $GITHUB_ENV
+
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
