@@ -68,8 +68,8 @@ jobs:
           cd backend
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip uninstall -y onnxruntime
-          pip install onnxruntime-gpu
+          pip uninstall -y onnxruntime onnxruntime-gpu
+          pip install onnxruntime
 
       - name: Build executable with PyInstaller
         run: |
@@ -356,15 +356,6 @@ jobs:
         run: |
           cd frontend
           npm install
-
-      - name: Export LD_LIBRARY_PATH (linux only)
-        if: matrix.platform == 'ubuntu-22.04'
-        shell: bash
-        run: |
-          echo "Checking directory structure:"
-          ls -la ${GITHUB_WORKSPACE}/sync-microservice/dist/
-          ls -la ${GITHUB_WORKSPACE}/backend/dist/
-          echo "LD_LIBRARY_PATH=${GITHUB_WORKSPACE}/sync-microservice/dist/_internal:${GITHUB_WORKSPACE}/backend/dist/_internal:${LD_LIBRARY_PATH}" >> $GITHUB_ENV
 
       - uses: tauri-apps/tauri-action@v0
         env:
