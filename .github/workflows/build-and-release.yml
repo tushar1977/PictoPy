@@ -362,6 +362,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY}}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          RUST_LOG: tauri_bundler=trace
+          NO_STRIP: "true"
         with:
           projectPath: ./frontend
           tagName: ${{ github.event.release.tag_name || github.event.inputs.tag }}
@@ -369,4 +371,4 @@ jobs:
           releaseId: ${{ github.event.release.id || '' }}
           releaseDraft: false
           prerelease: false
-          args: ${{ matrix.args }}
+          args: ${{ matrix.args }} --verbose
