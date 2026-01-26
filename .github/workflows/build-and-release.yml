@@ -68,8 +68,8 @@ jobs:
           cd backend
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip uninstall -y onnxruntime onnxruntime-gpu
-          pip install onnxruntime
+          pip uninstall -y onnxruntime
+          pip install onnxruntime-gpu
 
       - name: Build executable with PyInstaller
         run: |
@@ -357,16 +357,21 @@ jobs:
           cd frontend
           npm install
 
+      - name: Export LD_LIBRARY_PATH (linux only)
+        if: matrix.platform == 'ubuntu-22.04'
+        shell: bash
+        run: |
+          echo "Checking directory structure:"
+          ls -la ${GITHUB_WORKSPACE}/sync-microservice/dist/
+          ls -la ${GITHUB_WORKSPACE}/backend/dist/
+          export LD_LIBRARY_PATH=${GITHUB_WORKSPACE}/sync-microservice/dist/_internal/:${GITHUB_WORKSPACE}/backend/dist/_internal/:$LD_LIBRARY_PATH
+
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY}}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
           RUST_LOG: tauri_bundler=trace
-          LD_LIBRARY_PATH: >
-            ${GITHUB_WORKSPACE}/sync-microservice/dist/_internal:
-            ${GITHUB_WORKSPACE}/backend/dist/_internal:
-            ${{ env.LD_LIBRARY_PATH }}
           NO_STRIP: "true"
         with:
           projectPath: ./frontend
